@@ -21,6 +21,9 @@ class SOAP(Representation):
             "rbf": rbf,
         }
 
+    def _get_config(self):
+        return self.config
+
     def compute(self, data):
         if data.b is None:
             ds_soap = dsSOAP(
