@@ -6,7 +6,7 @@ authors = ["Marcel Langer <dev@sirmarcel.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-cmlkit = ">=2.0.0a13"
+cmlkit = ">=2.0.0a14"
 dscribe = "*"
 
 [tool.poetry.dev-dependencies]
