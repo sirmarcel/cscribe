@@ -7,7 +7,7 @@ from .conversion import to_local
 class SOAP(Representation):
 
     kind = "ds_soap"
-    default_context = {"n_jobs": 1, "verbose": "False"}
+    default_context = {"n_jobs": 1, "verbose": False}
 
     def __init__(self, elems, cutoff, sigma, n_max, l_max, rbf="gto", context={}):
         super().__init__(context=context)
@@ -29,6 +29,7 @@ class SOAP(Representation):
                 nmax=self.config["n_max"],
                 lmax=self.config["l_max"],
                 sigma=self.config["sigma"],
+                rbf=self.config["rbf"],
                 crossover=True,
                 periodic=False,
             )
@@ -40,6 +41,7 @@ class SOAP(Representation):
                 nmax=self.config["n_max"],
                 lmax=self.config["l_max"],
                 sigma=self.config["sigma"],
+                rbf=self.config["rbf"],
                 crossover=True,
                 periodic=True,
             )
@@ -50,4 +52,4 @@ class SOAP(Representation):
             verbose=self.context["verbose"],
         )
 
-        return to_local(rep)
+        return to_local(data, rep)
