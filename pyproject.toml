@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cscribe"
+version = "0.1.0"
+description = "cmlkit plugin for the dscribe package"
+authors = ["Marcel Langer <dev@sirmarcel.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+cmlkit = ">=2.0.0a13"
+dscribe = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
