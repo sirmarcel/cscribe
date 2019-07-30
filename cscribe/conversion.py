@@ -21,5 +21,5 @@ def to_local(data, rep):
     offsets[1::] = np.cumsum(counts)
 
     return np.array(
-        [rep[offsets[i] : offsets[i + 1]] for i in range(data.n)], dtype=object
+        [rep[offsets[i]: offsets[i + 1]] for i in range(data.n)], dtype=object
     )

@@ -5,6 +5,25 @@ from .conversion import to_local
 
 
 class SOAP(Representation):
+    """SOAP Representation (implemented in DScribe).
+
+    For details, see https://singroup.github.io/dscribe/tutorials/soap.html
+    or the dscribe source.
+
+    Parametrisation here is identical to "original" quippy SOAP,
+    with the addition of the "rbf" argument.
+
+    Parameters:
+        elems: Elements for which we compute SOAP
+        cutoff: Cutoff radius
+        sigma: Broadening
+        n_max: Number of radial basis functions
+        l_max: Number of angular basis functions
+        rbf: Radial basis set. Either "gto" for Gaussians,
+            or "polynomial" for a polynomial basis set more
+            similar to the "original" SOAP approach.
+
+    """
 
     kind = "ds_soap"
     default_context = {"n_jobs": 1, "verbose": False}

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cscribe"
+name = "cmlkit.cscribe"
 version = "0.1.0"
 description = "cmlkit plugin for the dscribe package"
 authors = ["Marcel Langer <dev@sirmarcel.com>"]
@@ -8,6 +8,7 @@ authors = ["Marcel Langer <dev@sirmarcel.com>"]
 python = "^3.7"
 cmlkit = ">=2.0.0a14"
 dscribe = "*"
+numpy = ">=1.15"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
