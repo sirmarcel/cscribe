@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cscribe"
-version = "0.1.0"
+version = "0.2.0"
 description = "cmlkit plugin for the dscribe package"
 authors = ["Marcel Langer <dev@sirmarcel.com>"]
 license = "MIT"
