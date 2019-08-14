@@ -4,7 +4,7 @@ import numpy as np
 
 
 def to_local(data, rep):
-    """Indices of local descriptors belonging to structures
+    """Convert dscribe-style atomic rep to cmlkit-style atomic rep.
 
     dscribe returns local descriptors as one flat array of dimension
     n_total_atoms x dim, whereas cmlkit expects a ndarray-list of length
@@ -13,6 +13,14 @@ def to_local(data, rep):
 
     The translation between these two notations is done via an offset array,
     which keeps track of which entries in the dscribe array belong to which atom.
+
+    Args:
+        data: Dataset instance
+        rep: ndarray n_total_atoms x dim
+
+    Returns:
+        cmlkit-style atomic representation
+
     """
 
     counts = data.info["atoms_by_system"]
@@ -21,5 +29,52 @@ def to_local(data, rep):
     offsets[1::] = np.cumsum(counts)
 
     return np.array(
-        [rep[offsets[i]: offsets[i + 1]] for i in range(data.n)], dtype=object
+        [rep[offsets[i] : offsets[i + 1]] for i in range(data.n)], dtype=object
     )
+
+
+def in_blocks(data, rep):
+    """Arrange local representation in blocks by element.
+
+    Some representations (ACSF) are returned without taking the central atom type
+    into account. This doesn't work with kernel ridge regression, so we re-arrange
+    the respresentation into zero-padded element blocks, like so:
+
+    Let (...) be the representation. Let's say we have Z's 1 and 2. Let's say we
+    have one molecule with first atom Z1=1, second Z2=1. Let's say we have dim=2.
+
+    The result of this function will be
+
+    [
+     (Z1=1) (0, 0),
+     (0, 0), (Z2=1)
+    ]
+
+    I.e. we will have separate blocks for each central atom, filled with zeros where
+    the central atom type is "not in use".
+
+    Args:
+        dataset: Dataset instance
+        rep: cmlkit-style atomic representation
+
+    Returns:
+        cmlkit-style atomic representation
+
+    """
+
+    n_elems = data.info["total_elements"]
+    elem_idx = {e: i for i, e in enumerate(data.info["elements"])}
+
+    all_new = []
+
+    for i, rep_system in enumerate(rep):
+        dim = len(rep_system[0])
+        new = np.zeros((len(rep_system), dim*n_elems))
+
+        for j, rep_atom in enumerate(rep_system):
+            idx = elem_idx[data.z[i][j]]
+            new[j, idx * dim : (idx + 1) * dim] = rep_atom
+
+        all_new.append(new)
+
+    return np.array(all_new, dtype=object)
