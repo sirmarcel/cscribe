@@ -57,6 +57,41 @@ class TestSymmetryFunctions(TestCase):
                 computed[0][1][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
             )
 
+    def test_rad_sf_periodic(self):
+
+        data = Dataset(
+            z=np.array([[1, 1]]),
+            r=np.array([[[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]]]),
+            b=np.array([[[8.0, 0, 0], [0, 8.0, 0], [0, 0, 8.0]]]),
+        )
+
+        # waiting for dscribe to get upgraded...
+        with self.assertRaises(ValueError):
+            for i in range(5):
+                eta = np.random.random()
+                mu = np.random.random()
+                cutoff = 6.0
+
+                sf = SymmetryFunctions(
+                    elems=[1], cutoff=cutoff, sfs=[{"rad": {"eta": eta, "mu": mu}}]
+                )
+
+                computed = sf(data)
+
+                print(computed.shape)
+
+                np.testing.assert_almost_equal(computed[0][0][0], fc(2.0, cutoff))
+
+                np.testing.assert_almost_equal(
+                    computed[0][0][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
+                )
+
+                np.testing.assert_almost_equal(computed[0][1][0], fc(2.0, cutoff))
+
+                np.testing.assert_almost_equal(
+                    computed[0][1][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
+                )
+
     def test_parametrized_sf(self):
 
         data = Dataset(

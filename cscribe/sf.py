@@ -104,8 +104,21 @@ class SymmetryFunctions(Representation):
 def compute_symmfs(data, elems, cutoff, sfs, n_jobs=1, verbose=False):
     g2_params, g4_params = make_params(sfs)
 
+    periodic = data.b is not None
+
+    if periodic:
+        raise ValueError(
+            "Periodic structures are not yet supported by dscribe release versions."
+        )
+
+    # waiting for dscribe to release with periodic acsf!
     acsf = ACSF(
-        rcut=cutoff, g2_params=g2_params, g4_params=g4_params, species=elems, sparse=False
+        rcut=cutoff,
+        g2_params=g2_params,
+        g4_params=g4_params,
+        species=elems,
+        sparse=False,
+        # periodic=periodic,
     )
 
     rep = acsf.create(data.as_Atoms(), n_jobs=n_jobs, verbose=verbose)
