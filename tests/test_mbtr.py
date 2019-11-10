@@ -18,11 +18,10 @@ class TestMBTR1(TestCase):
             "geomf": "atomic_number",
             "weightf": "unity",
             "broadening": 0.001,
-            "elems": [0, 1, 2, 3],
             "acc": 0.001,
         }
 
-        mbtr = MBTR(mbtr_1=mbtr_1, flatten=True)
+        mbtr = MBTR(elems=[0, 1, 2, 3], mbtr_1=mbtr_1, flatten=True)
 
         computed = mbtr(self.data)
 
@@ -55,11 +54,10 @@ class TestMBTR2(TestCase):
             "geomf": "1/distance",
             "weightf": "unity",
             "broadening": 0.0001,
-            "elems": [1],
             "acc": 0.001,
         }
 
-        mbtr = MBTR(mbtr_2=mbtr_2, flatten=True, normalize_gaussians=True)
+        mbtr = MBTR(elems=[1], mbtr_2=mbtr_2, flatten=True, normalize_gaussians=True)
 
         computed = mbtr(self.data)
         print(computed)
@@ -81,11 +79,10 @@ class TestMBTR2(TestCase):
             "geomf": "1/distance",
             "weightf": {"exp": {"ls": 1.0}},
             "broadening": 0.0001,
-            "elems": [1],
             "acc": 0.001,
         }
 
-        mbtr = MBTR(mbtr_2=mbtr_2, flatten=True, normalize_gaussians=True)
+        mbtr = MBTR(elems=[1], mbtr_2=mbtr_2, flatten=True, normalize_gaussians=True)
 
         computed = mbtr(self.data)
 
@@ -105,11 +102,10 @@ class TestMBTR3(TestCase):
             "geomf": "angle",
             "weightf": "unity",
             "broadening": 0.0001,
-            "elems": [1],
             "acc": 0.001,
         }
 
-        mbtr = MBTR(mbtr_3=mbtr_3, flatten=True, normalize_gaussians=True)
+        mbtr = MBTR(elems=[1], mbtr_3=mbtr_3, flatten=True, normalize_gaussians=True)
 
         computed = mbtr(self.data)
         print(computed)

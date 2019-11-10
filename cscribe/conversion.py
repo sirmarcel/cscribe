@@ -33,7 +33,7 @@ def to_local(data, rep):
     )
 
 
-def in_blocks(data, rep):
+def in_blocks(data, rep, elems=None):
     """Arrange local representation in blocks by element.
 
     Some representations (ACSF) are returned without taking the central atom type
@@ -54,16 +54,21 @@ def in_blocks(data, rep):
     the central atom type is "not in use".
 
     Args:
-        dataset: Dataset instance
+        data: Dataset instance
         rep: cmlkit-style atomic representation
+        elems: List of elements to take into account,
+            if not specified will use the ones given in data.
 
     Returns:
         cmlkit-style atomic representation
 
     """
-
-    n_elems = data.info["total_elements"]
-    elem_idx = {e: i for i, e in enumerate(data.info["elements"])}
+    if elems is None:
+        n_elems = data.info["total_elements"]
+        elem_idx = {e: i for i, e in enumerate(data.info["elements"])}
+    else:
+        n_elems = len(elems)
+        elem_idx = {e: i for i, e in enumerate(elems)}
 
     all_new = []
 

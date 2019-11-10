@@ -67,13 +67,15 @@ class SymmetryFunctions(Representation):
         elems: List of elements for which SFs are supposed to be computed
         cutoff: Cutoff
         sfs: List of configs of SFs or configs of parametrization schemes
+        stratify: Whether to arrange output in separate blocks depending on
+            central element type, default True
 
     """
 
     kind = "ds_sf"
     default_context = {"verbose": False, "n_jobs": 1}
 
-    def __init__(self, elems, cutoff, sfs=[], context={}):
+    def __init__(self, elems, cutoff, sfs=[], stratify=True, context={}):
         super().__init__(context=context)
 
         sfs_with_cutoff = []
@@ -85,7 +87,7 @@ class SymmetryFunctions(Representation):
         self.runner_config = prepare_config(
             elems=elems, elemental=[], universal=sfs_with_cutoff
         )
-        self.config = {"elems": elems, "sfs": sfs, "cutoff": cutoff}
+        self.config = {"elems": elems, "sfs": sfs, "cutoff": cutoff, "stratify": stratify}
 
     def compute(self, data):
         return compute_symmfs(
@@ -95,13 +97,14 @@ class SymmetryFunctions(Representation):
             sfs=self.runner_config["universal"],
             n_jobs=self.context["n_jobs"],
             verbose=self.context["verbose"],
+            stratify=self.config["stratify"]
         )
 
     def _get_config(self):
         return self.config
 
 
-def compute_symmfs(data, elems, cutoff, sfs, n_jobs=1, verbose=False):
+def compute_symmfs(data, elems, cutoff, sfs, stratify=True, n_jobs=1, verbose=False):
     g2_params, g4_params = make_params(sfs)
 
     periodic = data.b is not None
@@ -123,7 +126,10 @@ def compute_symmfs(data, elems, cutoff, sfs, n_jobs=1, verbose=False):
 
     rep = acsf.create(data.as_Atoms(), n_jobs=n_jobs, verbose=verbose)
 
-    return in_blocks(data, to_local(data, rep))
+    if stratify:
+        return in_blocks(data, to_local(data, rep), elems=elems)
+    else:
+        return to_local(data, rep)
 
 
 def make_params(sfs):

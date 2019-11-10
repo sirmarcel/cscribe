@@ -1,6 +1,9 @@
 from cmlkit.representation import Representation
 from cmlkit.engine import parse_config
 from dscribe.descriptors import MBTR as dsMBTR
+from dscribe.descriptors import LMBTR as dsLMBTR
+
+from .conversion import to_local, in_blocks
 
 
 class MBTR(Representation):
@@ -13,18 +16,18 @@ class MBTR(Representation):
     dscribe and cmlkit.
 
     Parameters:
+        elems: Elements for which we compute MBTR
         mbtr_1: Inner config dict for k=1 MBTR, or None
         mbtr_2: Inner config dict for k=2 MBTR, or None
         mbtr_3: Inner config dict for k=2 MBTR, or None
         norm: Either None, "l2_each", or "n_atoms"
-        normalize_gaussians: Bool
-        flatten: Bool, default True
+        normalize_gaussians: Bool, default True
+        flatten: Bool, default True (False can only be used for diagnostics)
         sparse: Bool, default False (True is untested in cmlkit)
 
 
 
     Each config dict has keys:
-        elems: Elements for which we compute MBTR (must be the the same for all)
         start: Value of the first MBTR bin
         stop: Value of last bin
         num: Number of bins
@@ -47,6 +50,7 @@ class MBTR(Representation):
 
     def __init__(
         self,
+        elems,
         mbtr_1=None,
         mbtr_2=None,
         mbtr_3=None,
@@ -59,6 +63,7 @@ class MBTR(Representation):
         super().__init__(context=context)
 
         self.ds_config = _to_dscribe_config(
+            elems=elems,
             mbtr_1=mbtr_1,
             mbtr_2=mbtr_2,
             mbtr_3=mbtr_3,
@@ -69,6 +74,7 @@ class MBTR(Representation):
         )
 
         self.config = {
+            "elems": elems,
             "mbtr_1": mbtr_1,
             "mbtr_2": mbtr_2,
             "mbtr_3": mbtr_3,
@@ -95,7 +101,91 @@ class MBTR(Representation):
         return rep
 
 
+class LMBTR(MBTR):
+    """Local MBTR as implemented in dscribe.
+
+    For details, see https://singroup.github.io/dscribe/tutorials/lmbtr.html
+    or the dscribe source.
+
+    Parameters:
+        elems: Elements for which we compute MBTR
+        mbtr_1: None; retained for compatibility with MBTR. Is ignored.
+        mbtr_2: Inner config dict for k=2 MBTR, or None
+        mbtr_3: Inner config dict for k=2 MBTR, or None
+        norm: Either None or "l2_each"
+        normalize_gaussians: Bool, default True
+        flatten: Bool, default True (False can only be used for diagnostics)
+        sparse: Bool, default False (True is untested in cmlkit)
+        stratify: Whether to arrange output in separate blocks depending on
+            central element type, default True
+
+    Each config dict has keys:
+        start: Value of the first MBTR bin
+        stop: Value of last bin
+        num: Number of bins
+        acc: Float specifying when to stop counting contributions.
+        geomf: String specifying the geometry function
+            k=2: "1/distance", "distance"
+            k=3: "angle", "cos_angle"
+        weightf: String specifying the weight function:
+            "unity": No weighting (will diverge in periodic case)
+            "exp": Exp(-ls x). Parametrised in MBTR standard way, i.e.
+                 {"exp": {"ls": s}}
+        broadening: Value of exponential bin broadening.
+            (smaller values -> smaller width)
+
+    """
+
+    kind = "ds_lmbtr"
+
+    def __init__(
+        self,
+        elems,
+        mbtr_1=None,
+        mbtr_2=None,
+        mbtr_3=None,
+        normalize_gaussians=True,
+        norm=None,
+        flatten=True,
+        sparse=False,
+        stratify=True,
+        context={},
+    ):
+        super().__init__(
+            elems=elems,
+            mbtr_1=None,
+            mbtr_2=mbtr_2,
+            mbtr_3=mbtr_3,
+            normalize_gaussians=normalize_gaussians,
+            norm=norm,
+            flatten=flatten,
+            sparse=sparse,
+            context=context,
+        )
+
+        self.config["stratify"] = stratify
+
+    def compute(self, data):
+        if data.b is None:
+            ds_mbtr = dsLMBTR(**{**self.ds_config, "periodic": False})
+        else:
+            ds_mbtr = dsLMBTR(**{**self.ds_config, "periodic": True})
+
+        rep = ds_mbtr.create(
+            data.as_Atoms(),
+            positions=[None for i in range(data.n)],
+            n_jobs=self.context["n_jobs"],
+            verbose=self.context["verbose"],
+        )
+
+        if self.config["stratify"]:
+            return in_blocks(data, to_local(data, rep), elems=self.config["elems"])
+        else:
+            return to_local(data, rep)
+
+
 def _to_dscribe_config(
+    elems,
     mbtr_1=None,
     mbtr_2=None,
     mbtr_3=None,
@@ -105,22 +195,12 @@ def _to_dscribe_config(
     sparse=False,
 ):
     result = {}
-    elems = None
     if mbtr_1 is not None:
         result["k1"] = _to_single_mbtr_config(mbtr_1)
-        elems = mbtr_1["elems"]
     if mbtr_2 is not None:
         result["k2"] = _to_single_mbtr_config(mbtr_2)
-        if elems is not None:
-            assert elems == mbtr_2["elems"]
-        else:
-            elems = mbtr_2["elems"]
     if mbtr_3 is not None:
         result["k3"] = _to_single_mbtr_config(mbtr_3)
-        if elems is not None:
-            assert elems == mbtr_3["elems"]
-        else:
-            elems = mbtr_3["elems"]
 
     assert len(result) > 0, "At least one MBTR must be specified."
     result["normalization"] = _to_norm(norm)
