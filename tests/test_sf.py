@@ -65,32 +65,31 @@ class TestSymmetryFunctions(TestCase):
             b=np.array([[[8.0, 0, 0], [0, 8.0, 0], [0, 0, 8.0]]]),
         )
 
-        # waiting for dscribe to get upgraded...
-        with self.assertRaises(ValueError):
-            for i in range(5):
-                eta = np.random.random()
-                mu = np.random.random()
-                cutoff = 6.0
+        # just testing that nothing is broken; cutoff is smaller than cell
+        for i in range(5):
+            eta = np.random.random()
+            mu = np.random.random()
+            cutoff = 6.0
 
-                sf = SymmetryFunctions(
-                    elems=[1], cutoff=cutoff, sfs=[{"rad": {"eta": eta, "mu": mu}}]
-                )
+            sf = SymmetryFunctions(
+                elems=[1], cutoff=cutoff, sfs=[{"rad": {"eta": eta, "mu": mu}}]
+            )
 
-                computed = sf(data)
+            computed = sf(data)
 
-                print(computed.shape)
+            print(computed.shape)
 
-                np.testing.assert_almost_equal(computed[0][0][0], fc(2.0, cutoff))
+            np.testing.assert_almost_equal(computed[0][0][0], fc(2.0, cutoff))
 
-                np.testing.assert_almost_equal(
-                    computed[0][0][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
-                )
+            np.testing.assert_almost_equal(
+                computed[0][0][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
+            )
 
-                np.testing.assert_almost_equal(computed[0][1][0], fc(2.0, cutoff))
+            np.testing.assert_almost_equal(computed[0][1][0], fc(2.0, cutoff))
 
-                np.testing.assert_almost_equal(
-                    computed[0][1][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
-                )
+            np.testing.assert_almost_equal(
+                computed[0][1][1], rad_sf(2.0, eta, mu) * fc(2.0, cutoff)
+            )
 
     def test_parametrized_sf(self):
 

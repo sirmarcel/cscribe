@@ -10,7 +10,7 @@ repository = "https://github.com/sirmarcel/cscribe"
 [tool.poetry.dependencies]
 python = "^3.7"
 cmlkit = ">=2.0.0a14"
-dscribe = "^0.2.9"
+dscribe = "^0.3"
 numpy = ">=1.15"
 
 [tool.poetry.dev-dependencies]

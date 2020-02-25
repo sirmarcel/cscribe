@@ -74,7 +74,7 @@ def in_blocks(data, rep, elems=None):
 
     for i, rep_system in enumerate(rep):
         dim = len(rep_system[0])
-        new = np.zeros((len(rep_system), dim*n_elems))
+        new = np.zeros((len(rep_system), dim * n_elems))
 
         for j, rep_atom in enumerate(rep_system):
             idx = elem_idx[data.z[i][j]]
